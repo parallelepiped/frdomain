@@ -2,12 +2,10 @@ package frdomain.ch5
 package domain
 package service
 
-import java.util.Date
+import frdomain.ch5.domain.repository.AccountRepository
 import scalaz._
-import Scalaz._
-import Kleisli._
 
-import repository.AccountRepository
+import java.util.Date
 
 
 sealed trait AccountType
@@ -31,6 +29,6 @@ trait AccountService[Account, Amount, Balance] {
   def transfer(from: String, to: String, amount: Amount): AccountOperation[(Account, Account)] = for { 
     a <- debit(from, amount)
     b <- credit(to, amount)
-  } yield ((a, b))
+  } yield (a, b)
 }
 

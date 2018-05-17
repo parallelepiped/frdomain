@@ -1,10 +1,9 @@
 package frdomain.ch5
 package free
 
+import frdomain.ch5.free.common._
+
 import java.util.Date
-import scalaz._
-import Scalaz._
-import common._
 
 trait AccountService[Account, Amount, Balance] {
   def open(no: String, name: String, openingDate: Option[Date]): AccountRepo[Account]
@@ -14,6 +13,7 @@ trait AccountService[Account, Amount, Balance] {
   def balance(no: String): AccountRepo[Balance]
 }
 
+// Account Service Impl
 object AccountService extends AccountService[Account, Amount, Balance] with AccountRepository {
   
   def open(no: String, name: String, openingDate: Option[Date]) = for {

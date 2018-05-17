@@ -4,7 +4,6 @@ package app
 
 import scalaz._
 import Scalaz._
-import \/._
 
 import repository.interpreter.AccountRepositoryInMemory
 import model.common._
@@ -13,8 +12,10 @@ import Account._
 
 object App2 {
   import AccountRepositoryInMemory._
-  val account = checkingAccount("a-123", "debasish ghosh", today.some, None, Balance(0)).toOption.get
-  val c = for {
+
+  val account: Account = checkingAccount("a-123", "debasish ghosh", today.some, None, Balance()).toOption.get
+
+  val c: NonEmptyList[String] \/ Balance = for {
     b <- updateBalance(account, 10000)
     c <- store(b)
     d <- balance(c.no)
