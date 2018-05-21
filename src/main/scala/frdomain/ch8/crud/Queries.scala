@@ -1,17 +1,15 @@
 package frdomain.ch8
 package crud
 
-import java.sql.Timestamp
-import slick.driver.H2Driver.api._
-import slick.jdbc.meta._
-import slick.backend.DatabasePublisher
-
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
-import Accounts._
-import Balances._
+import frdomain.ch8.crud.Accounts._
+import frdomain.ch8.crud.Balances._
+import slick.backend.DatabasePublisher
+import slick.driver.H2Driver.api._
+
+import java.sql.Timestamp
 
 trait Queries {
   final val timeout: Duration = 2 seconds

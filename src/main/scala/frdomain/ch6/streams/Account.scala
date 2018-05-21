@@ -1,18 +1,15 @@
 package frdomain.ch6
 package streams
 
-import java.util.{ Date, Calendar }
-import util.{ Try, Success, Failure }
-import scalaz._
-import Scalaz._
+import java.util.{Calendar, Date}
 
 object common {
   type Amount = BigDecimal
 
-  def today = Calendar.getInstance.getTime
+  def today: Date = Calendar.getInstance.getTime
 }
 
-import common._
+import frdomain.ch6.streams.common._
 
 case class Balance(amount: Amount = 0)
 

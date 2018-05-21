@@ -3,18 +3,17 @@ package domain
 package service
 package interpreter
 
-import scalaz._
-import Scalaz._
-import Kleisli._
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
-import ExecutionContext.Implicits.global
 
-import model.{ Account, Balance }
-import model.common._
+import frdomain.ch6.domain.model.Account
+import frdomain.ch6.domain.model.common._
+import scalaz.Kleisli._
+import scalaz.Scalaz._
+import scalaz._
 
 class InterestPostingServiceInterpreter extends InterestPostingService[Account, Amount] {
-  def computeInterest = kleisli[Valid, Account, Amount] { (account: Account) =>
+  def computeInterest: Kleisli[Valid, Account, Amount] = kleisli[Valid, Account, Amount] { account: Account =>
     EitherT {
       Future {
         if (account.dateOfClose isDefined) NonEmptyList(s"Account ${account.no} is closed").left
@@ -26,7 +25,7 @@ class InterestPostingServiceInterpreter extends InterestPostingService[Account, 
     }
   }
 
-  def computeTax = kleisli[Valid, Amount, Amount] { amount: Amount =>
+  def computeTax: Kleisli[Valid, Amount, Amount] = kleisli[Valid, Amount, Amount] { amount: Amount =>
     EitherT {
       Future {
         (amount * 0.1).right

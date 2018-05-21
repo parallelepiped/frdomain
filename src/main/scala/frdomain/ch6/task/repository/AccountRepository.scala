@@ -2,13 +2,12 @@ package frdomain.ch6
 package task
 package repository
 
-import java.util.Date
+import frdomain.ch6.task.model._
 import scalaz._
-import Scalaz._
-import \/._
-import model._
 
-trait AccountRepository { 
+import java.util.Date
+
+trait AccountRepository {
   def query(no: String): \/[NonEmptyList[String], Option[Account]]
   def store(a: Account): \/[NonEmptyList[String], Account]
   def query(openedOn: Date): \/[NonEmptyList[String], Seq[Account]]

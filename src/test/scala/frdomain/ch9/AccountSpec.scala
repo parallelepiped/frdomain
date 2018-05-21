@@ -1,18 +1,15 @@
 package frdomain.ch9
 package domain.model
 
-import java.util.Date
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.Gen._
+import org.scalacheck.Prop.forAll
 import org.scalacheck._
-import Prop.{ forAll, BooleanOperators }
-import Gen._
-import Arbitrary.arbitrary
-
 import scalaz._
-import Scalaz._
+
+import java.util.Date
 
 object AllGen {
-
-  import common._
 
   val genAmount = for {
     value <- Gen.chooseNum(100, 10000000)
@@ -28,14 +25,14 @@ object AllGen {
 
   val genName = Gen.oneOf("john", "david", "mary")
 
-  def genOptionalValidCloseDate(seed: Date) = 
+  def genOptionalValidCloseDate(seed: Date): Gen[Option[Date]] =
     Gen.frequency(
       (8, Some(aDateAfter(seed))), 
       (1, None)
     )
-  def aDateAfter(date: Date) = new Date(date.getTime() + 10000)
-  def aDateBefore(date: Date) = new Date(date.getTime() - 10000)
-  def genInvalidOptionalCloseDate(seed: Date) = Gen.oneOf(Some(aDateBefore(seed)), None)
+  def aDateAfter(date: Date) = new Date(date.getTime + 10000)
+  def aDateBefore(date: Date) = new Date(date.getTime - 10000)
+  def genInvalidOptionalCloseDate(seed: Date): Gen[Option[Date]] = Gen.oneOf(Some(aDateBefore(seed)), None)
 }
 
 object CheckingAccountSpecification extends Properties("Account") {
@@ -43,7 +40,7 @@ object CheckingAccountSpecification extends Properties("Account") {
   import Account._
   import AllGen._
 
-  val validCheckingAccountGen = for {
+  val validCheckingAccountGen: Gen[NonEmptyList[AccountException] \/ Account] = for {
     no <- genValidAccountNo
     nm <- genName
     od <- arbitrary[Date]
@@ -99,9 +96,7 @@ object CheckingAccountSpecification extends Properties("Account") {
   property("Close Account if not already closed") = forAll(validCheckingAccountGen) { 
     _.map { account =>
       account.dateOfClose.map(_ => true).getOrElse(
-        close(account, 
-              account.dateOfOpen.map(aDateAfter(_)).getOrElse(common.today)
-        ).isRight == true
+        close(account, account.dateOfOpen.map(aDateAfter).getOrElse(common.today)).isRight
       )
     }.getOrElse(false)
   }

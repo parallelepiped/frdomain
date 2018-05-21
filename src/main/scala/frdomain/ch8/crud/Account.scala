@@ -1,8 +1,9 @@
 package frdomain.ch8
 package crud
 
-import java.sql.Timestamp
 import slick.driver.H2Driver.api._
+
+import java.sql.Timestamp
 
 case class Account(id: Option[Long], 
   no: String, 
@@ -18,8 +19,7 @@ case class Balance(id: Option[Long],
   amount: BigDecimal
 )
 
-import Accounts._
-import Balances._
+import frdomain.ch8.crud.Accounts._
 
 class Accounts(tag: Tag) extends Table[Account](tag, "accounts") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)

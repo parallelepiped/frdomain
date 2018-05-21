@@ -3,16 +3,14 @@ package domain
 package service
 package interpreter
 
-import java.util.{ Date, Calendar }
-
+import frdomain.ch5.domain.model.common._
+import frdomain.ch5.domain.model.{Account, Balance}
+import frdomain.ch5.domain.repository.AccountRepository
+import scalaz.Kleisli._
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
-import \/._
-import Kleisli._
 
-import model.{ Account, Balance }
-import model.common._
-import repository.AccountRepository
+import java.util.Date
 
 class AccountServiceInterpreter extends AccountService[Account, Amount, Balance] {
 
@@ -20,7 +18,7 @@ class AccountServiceInterpreter extends AccountService[Account, Amount, Balance]
            name: String, 
            rate: Option[BigDecimal],
            openingDate: Option[Date],
-           accountType: AccountType) = kleisli[Valid, AccountRepository, Account] { (repo: AccountRepository) =>
+           accountType: AccountType): AccountOperation[Account] = kleisli[Valid, AccountRepository, Account] { repo: AccountRepository =>
 
     repo.query(no) match {
       case \/-(Some(a)) => NonEmptyList(s"Already existing account with no $no").left[Account]
@@ -36,7 +34,7 @@ class AccountServiceInterpreter extends AccountService[Account, Amount, Balance]
     }
   }
 
-  def close(no: String, closeDate: Option[Date]) = kleisli[Valid, AccountRepository, Account] { (repo: AccountRepository) =>
+  def close(no: String, closeDate: Option[Date]): AccountOperation[Account] = kleisli[Valid, AccountRepository, Account] { repo: AccountRepository =>
     repo.query(no) match {
       case \/-(None) => NonEmptyList(s"Account $no does not exist").left[Account]
       case \/-(Some(a)) => 
@@ -46,14 +44,14 @@ class AccountServiceInterpreter extends AccountService[Account, Amount, Balance]
     }
   }
 
-  def debit(no: String, amount: Amount) = up(no, amount, D)
-  def credit(no: String, amount: Amount) = up(no, amount, C)
+  def debit(no: String, amount: Amount): AccountOperation[Account] = up(no, amount, D)
+  def credit(no: String, amount: Amount): AccountOperation[Account] = up(no, amount, C)
 
   private trait DC
   private case object D extends DC
   private case object C extends DC
 
-  private def up(no: String, amount: Amount, dc: DC): AccountOperation[Account] = kleisli[Valid, AccountRepository, Account] { (repo: AccountRepository) =>
+  private def up(no: String, amount: Amount, dc: DC): AccountOperation[Account] = kleisli[Valid, AccountRepository, Account] { repo: AccountRepository =>
     repo.query(no) match {
       case \/-(None) => NonEmptyList(s"Account $no does not exist").left[Account]
       case \/-(Some(a)) => dc match {
@@ -64,7 +62,7 @@ class AccountServiceInterpreter extends AccountService[Account, Amount, Balance]
     }
   }
 
-  def balance(no: String) = kleisli[Valid, AccountRepository, Balance] { (repo: AccountRepository) => repo.balance(no) }
+  def balance(no: String): AccountOperation[Balance] = kleisli[Valid, AccountRepository, Balance] { repo: AccountRepository => repo.balance(no) }
 }
 
 object AccountService extends AccountServiceInterpreter

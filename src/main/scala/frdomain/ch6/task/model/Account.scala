@@ -9,7 +9,7 @@ import Scalaz._
 object common {
   type Amount = BigDecimal
 
-  def today = Calendar.getInstance.getTime
+  def today: Date = Calendar.getInstance.getTime
 }
 
 import common._

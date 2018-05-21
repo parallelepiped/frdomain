@@ -2,18 +2,18 @@ package frdomain.ch9
 package domain
 package model
 
-import java.util.{ Date, Calendar }
-import util.{ Try, Success, Failure }
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
+
+import java.util.{Calendar, Date}
 
 object common {
   type Amount = BigDecimal
 
-  def today = Calendar.getInstance.getTime
+  def today: Date = Calendar.getInstance.getTime
 }
 
-import common._
+import frdomain.ch9.domain.model.common._
 
 case class Balance(amount: Amount = 0)
 
@@ -42,7 +42,7 @@ object Account {
   case class InsufficientBalance(message: String) extends Throwable(message)
 
   private def validateAccountNo(no: String): ValidationNel[AccountException, String] = 
-    if (no.isEmpty || no.size < 5) 
+    if (no.isEmpty || no.length < 5)
       AccountException(InvalidAccountNo(s"Account No has to be at least 5 characters long: found $no")).failureNel[String] 
     else no.successNel[AccountException]
 
@@ -62,7 +62,7 @@ object Account {
 
     (
       validateAccountNo(no) |@| 
-      validateOpenCloseDate(openDate.getOrElse(today), closeDate)
+      validateOpenCloseDate(od, closeDate)
     ) { (n, d) =>
       CheckingAccount(n, name, d._1, d._2, balance)
     }.disjunction
@@ -75,19 +75,19 @@ object Account {
 
     (
       validateAccountNo(no) |@| 
-      validateOpenCloseDate(openDate.getOrElse(today), closeDate) |@|
+      validateOpenCloseDate(od, closeDate) |@|
       validateRate(rate)
     ) { (n, d, r) =>
       SavingsAccount(n, name, r, d._1, d._2, balance)
     }.disjunction
   }
 
-  private def validateAccountAlreadyClosed(a: Account) = {
+  private def validateAccountAlreadyClosed(a: Account): ValidationNel[AccountException, Account] = {
     if (a.dateOfClose isDefined) AccountException(AlreadyClosed(s"Account ${a.no} is already closed")).failureNel[Account]
     else a.successNel[AccountException]
   }
 
-  private def validateCloseDate(a: Account, cd: Date) = {
+  private def validateCloseDate(a: Account, cd: Date): ValidationNel[AccountException, Date] = {
     if (cd before a.dateOfOpen.get) AccountException(InvalidOpenCloseDate(s"Close date [$cd] cannot be earlier than open date [${a.dateOfOpen.get}]")).failureNel[Date]
     else cd.successNel[AccountException]
   }
@@ -101,7 +101,7 @@ object Account {
     }.disjunction
   }
 
-  private def checkBalance(a: Account, amount: Amount) = {
+  private def checkBalance(a: Account, amount: Amount): ValidationNel[AccountException, Account] = {
     if (amount < 0 && a.balance.amount < -amount) AccountException(InsufficientBalance(s"Insufficient amount in ${a.no} to debit")).failureNel[Account]
     else a.successNel[AccountException]
   }
@@ -115,7 +115,7 @@ object Account {
     }.disjunction
   }
 
-  def rate(a: Account) = a match {
+  def rate(a: Account): Option[Amount] = a match {
     case SavingsAccount(_, _, r, _, _, _) => r.some
     case _ => None
   }

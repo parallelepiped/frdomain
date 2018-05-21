@@ -1,8 +1,9 @@
 package frdomain.ch4
 package patterns
 
-import java.util.{ Date, Calendar }
-import util.{ Try, Success, Failure }
+import scala.util.Success
+
+import java.util.{Calendar, Date}
 
 sealed trait Currency
 case object USD extends Currency
@@ -15,8 +16,8 @@ object common {
   val today = Calendar.getInstance.getTime
 }
 
-import common._
-import Monoid._
+import frdomain.ch4.patterns.Monoid._
+import frdomain.ch4.patterns.common._
 
 case class Money(m: Map[Currency, Amount]) {
   def toBaseCurrency: Amount = ???
@@ -45,10 +46,12 @@ object Account {
    */
   object FailSlowApplicative {
     import scalaz._
-    import syntax.apply._, syntax.std.option._, syntax.validation._
+    import syntax.apply._
+    import syntax.std.option._
+    import syntax.validation._
 
     private def validateAccountNo(no: String) = 
-      if (no.isEmpty || no.size < 5) s"Account No has to be at least 5 characters long: found $no".failureNel[String] 
+      if (no.isEmpty || no.length < 5) s"Account No has to be at least 5 characters long: found $no".failureNel[String]
       else no.successNel[String]
   
     private def validateOpenCloseDate(od: Date, cd: Option[Date]) = cd.map { c => 
@@ -94,10 +97,12 @@ object Account {
    */
   object FailFastApplicative {
     import scalaz._
-    import syntax.apply._, syntax.std.option._, std.either._
+    import std.either._
+    import syntax.apply._
+    import syntax.std.option._
 
     private def validateAccountNo(no: String): Either[String, String] =
-      if (no.isEmpty || no.size < 5) Left(s"Account No has to be at least 5 characters long: found $no")
+      if (no.isEmpty || no.length < 5) Left(s"Account No has to be at least 5 characters long: found $no")
       else Right(no)
   
     private def validateOpenCloseDate(od: Date, cd: Date): Either[String, (Date, Date)] = 
@@ -139,7 +144,7 @@ object Account {
     import syntax.std.option._
 
     private def validateAccountNo(no: String): Either[String, String] =
-      if (no.isEmpty || no.size < 5) Left(s"Account No has to be at least 5 characters long: found $no")
+      if (no.isEmpty || no.length < 5) Left(s"Account No has to be at least 5 characters long: found $no")
       else Right(no)
   
     private def validateOpenCloseDate(od: Date, cd: Date): Either[String, (Date, Date)] =
@@ -177,9 +182,8 @@ object Account {
   }
 }
 
-import scalaz._
-import Scalaz._
 import frdomain.ch3.repository._
+import scalaz._
 
 object AccountNumberGeneration {
   final class Generator(rep: AccountRepository) {

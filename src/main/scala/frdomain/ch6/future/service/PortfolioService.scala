@@ -2,16 +2,14 @@ package frdomain.ch6
 package future
 package service
 
-import java.util.Date
-import scalaz._
-import Scalaz._
-import Kleisli._
-
-import scala.language.higherKinds
-import repository.AccountRepository
-import model._
 import scala.concurrent._
-import ExecutionContext.Implicits.global
+import scala.language.higherKinds
+
+import frdomain.ch6.future.model._
+import frdomain.ch6.future.repository.AccountRepository
+import scalaz._
+
+import java.util.Date
 
 trait PortfolioService {
   type PFOperation[A] = Kleisli[Future, AccountRepository, Seq[A]]

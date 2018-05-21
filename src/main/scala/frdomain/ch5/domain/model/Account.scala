@@ -10,7 +10,7 @@ import java.util.{Calendar, Date}
 object common {
   type Amount = BigDecimal
 
-  def today = Calendar.getInstance.getTime
+  def today: Date = Calendar.getInstance.getTime
 }
 
 import frdomain.ch5.domain.model.common._

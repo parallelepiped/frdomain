@@ -3,19 +3,17 @@ package domain
 package service
 package interpreter
 
-import java.util.{ Date, Calendar }
-
-import scalaz._
-import Scalaz._
-import \/._
-import Kleisli._
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
-import ExecutionContext.Implicits.global
 
-import model.{ Account, Balance }
-import model.common._
-import repository.AccountRepository
+import frdomain.ch6.domain.model.common._
+import frdomain.ch6.domain.model.{Account, Balance}
+import frdomain.ch6.domain.repository.AccountRepository
+import scalaz.Kleisli._
+import scalaz.Scalaz._
+import scalaz._
+
+import java.util.Date
 
 class AccountServiceInterpreter extends AccountService[Account, Amount, Balance] {
 
@@ -23,7 +21,7 @@ class AccountServiceInterpreter extends AccountService[Account, Amount, Balance]
            name: String, 
            rate: Option[BigDecimal],
            openingDate: Option[Date],
-           accountType: AccountType) = kleisli[Valid, AccountRepository, Account] { (repo: AccountRepository) =>
+           accountType: AccountType): AccountOperation[Account] = kleisli[Valid, AccountRepository, Account] { repo: AccountRepository =>
 
     EitherT {
       Future {
@@ -43,7 +41,7 @@ class AccountServiceInterpreter extends AccountService[Account, Amount, Balance]
     }
   }
 
-  def close(no: String, closeDate: Option[Date]) = kleisli[Valid, AccountRepository, Account] { (repo: AccountRepository) =>
+  def close(no: String, closeDate: Option[Date]): AccountOperation[Account] = kleisli[Valid, AccountRepository, Account] { repo: AccountRepository =>
     EitherT {
       Future {
         repo.query(no) match {
@@ -57,14 +55,14 @@ class AccountServiceInterpreter extends AccountService[Account, Amount, Balance]
     }
   }
 
-  def debit(no: String, amount: Amount) = up(no, amount, D)
-  def credit(no: String, amount: Amount) = up(no, amount, C)
+  def debit(no: String, amount: Amount): AccountOperation[Account] = up(no, amount, D)
+  def credit(no: String, amount: Amount): AccountOperation[Account] = up(no, amount, C)
 
   private trait DC
   private case object D extends DC
   private case object C extends DC
 
-  private def up(no: String, amount: Amount, dc: DC): AccountOperation[Account] = kleisli[Valid, AccountRepository, Account] { (repo: AccountRepository) =>
+  private def up(no: String, amount: Amount, dc: DC): AccountOperation[Account] = kleisli[Valid, AccountRepository, Account] { repo: AccountRepository =>
     EitherT {
       Future {
         repo.query(no) match {
@@ -79,8 +77,7 @@ class AccountServiceInterpreter extends AccountService[Account, Amount, Balance]
     }
   }
 
-  def balance(no: String) = 
-    kleisli[Valid, AccountRepository, Balance] { (repo: AccountRepository) => 
+  def balance(no: String): AccountOperation[Balance] = kleisli[Valid, AccountRepository, Balance] { repo: AccountRepository =>
       EitherT {
         Future { repo.balance(no) }
       }

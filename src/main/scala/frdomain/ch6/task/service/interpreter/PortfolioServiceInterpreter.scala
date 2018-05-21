@@ -3,21 +3,16 @@ package task
 package service
 package interpreter
 
-import java.util.{ Date, Calendar }
-
+import frdomain.ch6.task.model._
+import frdomain.ch6.task.repository.AccountRepository
+import scalaz.Kleisli._
 import scalaz._
-import Scalaz._
 import scalaz.concurrent.Task
-import \/._
-import Kleisli._
 
-import model._
-import model.common._
-import repository.AccountRepository
+import java.util.Date
 
 class PortfolioServiceInterpreter extends PortfolioService {
-  def getCurrencyPortfolio(no: String, 
-    asOf: Date) = kleisli[Task, AccountRepository, Seq[Balance]] { (repo: AccountRepository) =>
+  def getCurrencyPortfolio(no: String, asOf: Date): PFOperation[Balance] = kleisli[Task, AccountRepository, Seq[Balance]] { repo: AccountRepository =>
 
     Task {
       repo.getCurrencyBalance(no, asOf) match {
@@ -27,8 +22,7 @@ class PortfolioServiceInterpreter extends PortfolioService {
     }
   }
 
-  def getEquityPortfolio(no: String, 
-    asOf: Date) = kleisli[Task, AccountRepository, Seq[Balance]] { (repo: AccountRepository) =>
+  def getEquityPortfolio(no: String, asOf: Date): PFOperation[Balance] = kleisli[Task, AccountRepository, Seq[Balance]] { repo: AccountRepository =>
 
     Task {
       repo.getEquityBalance(no, asOf) match {
@@ -38,8 +32,7 @@ class PortfolioServiceInterpreter extends PortfolioService {
     }
   }
 
-  def getFixedIncomePortfolio(no: String, 
-    asOf: Date) = kleisli[Task, AccountRepository, Seq[Balance]] { (repo: AccountRepository) =>
+  def getFixedIncomePortfolio(no: String, asOf: Date): PFOperation[Balance] = kleisli[Task, AccountRepository, Seq[Balance]] { repo: AccountRepository =>
 
     Task {
       repo.getFixedIncomeBalance(no, asOf) match {
@@ -50,4 +43,4 @@ class PortfolioServiceInterpreter extends PortfolioService {
   }
 }
 
-object PortfolioService extends PortfolioServiceInterpreter
+object PortfolioServiceInterpreter extends PortfolioServiceInterpreter

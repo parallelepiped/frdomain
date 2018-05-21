@@ -16,7 +16,7 @@ import model.common._
 
 class ReportingServiceInterpreter extends ReportingService[Amount] {
 
-  def balanceByAccount: ReportOperation[Seq[(String, Amount)]] = kleisli[Valid, AccountRepository, Seq[(String, Amount)]] { (repo: AccountRepository) =>
+  def balanceByAccount: ReportOperation[Seq[(String, Amount)]] = kleisli[Valid, AccountRepository, Seq[(String, Amount)]] { repo: AccountRepository =>
     EitherT {
       Future {
         repo.all match {

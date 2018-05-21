@@ -2,11 +2,8 @@ package frdomain.ch6
 package domain
 package service
 
+import frdomain.ch6.domain.repository.AccountRepository
 import scalaz._
-import Scalaz._
-import Kleisli._
-
-import repository.AccountRepository
 
 
 trait ReportingService[Amount] {

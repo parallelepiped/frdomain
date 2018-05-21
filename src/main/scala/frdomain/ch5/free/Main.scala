@@ -33,6 +33,6 @@ object Main {
     val inter = AccountRepoMutableInterpreter()
     val u = inter.apply(comp)
 
-    val v = AccountRepoShowInterpreter().interpret(comp, List.empty[String])
+    val v: List[String] = AccountRepoShowInterpreter().interpret(comp, List.empty[String])
   }
 }
